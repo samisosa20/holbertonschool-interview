@@ -1,47 +1,51 @@
 #!/usr/bin/python3
 """
-Module that parses a log and prints stats to stdout
+Script that reads stdin line by line and computes metrics.
+After every 10 lines and/or a keyboard interruption (CTRL + C),
+print these statistics from the beginning: Total file size
+and number of lines by status code.
+excecute: ./0-generator.py | ./0-stats.py
 """
-from sys import stdin
+import sys
 
-status_codes = {
-    "200": 0,
-    "301": 0,
-    "400": 0,
-    "401": 0,
-    "403": 0,
-    "404": 0,
-    "405": 0,
-    "500": 0
-}
-
-size = 0
+count = 0
+total_size = 0
+status_code = {'200': 0, '301': 0, '400': 0, '401': 0,
+               '403': 0, '404': 0, '405': 0, '500': 0}
 
 
-def print_stats():
-    """Prints the accumulated logs"""
-    print("File size: {}".format(size))
-    for status in sorted(status_codes.keys()):
-        if status_codes[status]:
-            print("{}: {}".format(status, status_codes[status]))
+def print_metrics():
+    """Method to print the statistics from the beginning"""
 
+    print("File size: {}".format(total_size))
 
-if __name__ == "__main__":
-    count = 0
-    try:
-        for line in stdin:
-            try:
-                items = line.split()
-                size += int(items[-1])
-                if items[-2] in status_codes:
-                    status_codes[items[-2]] += 1
-            except:
-                pass
-            if count == 9:
-                print_stats()
-                count = -1
-            count += 1
-    except KeyboardInterrupt:
-        print_stats()
-        raise
-    print_stats()
+    for key, value in sorted(status_code.items()):
+        if value > 0:
+            print("{}: {}".format(key, value))
+
+try:
+    for line in sys.stdin:
+
+        try:
+            code = line.split()[-2]
+            if code in status_code.keys():
+                status_code[code] += 1
+        except BaseException:
+            pass
+
+        try:
+            size = line.split()[-1]
+            total_size += int(size)
+        except BaseException:
+            pass
+
+        # print metrics every 10 lines
+        count += 1
+        if (count % 10 == 0):
+            print_metrics()
+
+    print_metrics()
+
+except KeyboardInterrupt:
+    print_metrics()
+    raise
