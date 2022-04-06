@@ -6,40 +6,27 @@
 // endpoint: https://swapi-api.hbtn.io/api/films/:id
 // ./0-starwars_characters.js 3
 
-const request = require('request');
+const request = require("request");
 const id = process.argv[2];
-const url = 'https://swapi-api.hbtn.io/api/films/' + id;
-
-// wrap a request in an promise
-function getCharacter(uri) {
-	return new Promise((resolve, reject) => {
-		request(uri, (error, response, body) => {
-			if (error) reject(error);
-			resolve(body);
-		});
-	});
-}
-
-// now to program the "usual" way
-// all you need to do is use async functions and await
-// for functions returning promises
-async function myBackEndLogic(listUri) {
-	try {
-		for (const uri of listUri) {
-			const data = await getCharacter(uri);
-			console.log(JSON.parse(data).name);
-		}
-	} catch (error) {
-		console.error('ERROR:');
-		console.error(error);
-	}
-}
+const url = `https://swapi-api.hbtn.io/api/films/${id}`;
 
 // get list of characters url
-request(url, function (error, response, body) {
-	if (!error && response.statusCode === 200) {
-		const characters = JSON.parse(body).characters;
-		// console.log(charactersList)
-		myBackEndLogic(characters);
-	}
+request(url, async function (error, response, body) {
+  if (error) {
+    console.log(error);
+  } else {
+    const characters = JSON.parse(body).characters;
+    for (const character of characters) {
+      const res = await new Promise((resolve, reject) => {
+        request(character, (error, res, html) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(JSON.parse(html).name);
+          }
+        });
+      });
+      console.log(res);
+    }
+  }
 });
