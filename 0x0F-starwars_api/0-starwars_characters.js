@@ -6,7 +6,7 @@
 // endpoint: https://swapi-api.hbtn.io/api/films/:id
 // ./0-starwars_characters.js 3
 
-const request = require("request");
+const request = require('request');
 const id = process.argv[2];
 const url = `https://swapi-api.hbtn.io/api/films/${id}`;
 
